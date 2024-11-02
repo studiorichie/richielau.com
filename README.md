@@ -4,8 +4,8 @@ A personal website built with `Jekyll` and hosted on `GitHub Pages`. This site e
 ## Requirements
 Before you start, make sure you have the following installed:
 
-- Ruby
-- Bundler
+- **Ruby**
+- **Bundler**
 
 ## Getting Started
 1. **Clone the Repository**
@@ -35,25 +35,23 @@ By default, the site will be accessible at [http://127.0.0.1:4000].
 - Stop the server: `CTRL+C` in your terminal
 - Clear the `_site` folder (optional): `rm -rf _site/` (useful if you encounter build issues)
 
-# Deployment to GitHub Pages
-GitHub Pages automatically rebuilds and deploys your site whenever changes are pushed to the repository. Here's the process:
+3. **Sync Changes with GitHub**
+Before making any changes, pull the latest changes from GitHub to avoid conflicts:
 
-1. **Stage and commit your changes**:
+```bash
+git pull --rebase origin main
+```
 
-bash
-Copy code
+
+4. **Commit and Push Changes**
+After making changes, add, commit, and push them to GitHub:
 ```bash
 git add .
-git commit -m "Your commit message here"
-```
-2. **Push to GitHub**:
-
-
-```bash
+git commit -m "Your commit message"
 git push origin main
 ```
 
-After pushing, GitHub Pages should automatically publish your changes to your live site at https://richielau.com.
+After pushing, GitHub Pages should automatically publish your changes to your live site at [https://richielau.com].
 
 # Notes on Deployment
 - Custom Domain: Make sure the `CNAME` file in the repository root contains your custom domain (e.g.,`richielau.com`).
@@ -61,4 +59,4 @@ Check GitHub Pages Status: It can take a few minutes for changes to be visible o
 
 # Additional Resources
 - Jekyll Documentation [https://jekyllrb.com/docs/]
-- GitHub Pages Documentation[https://docs.github.com/en/pages]
+- GitHub Pages Documentation [https://docs.github.com/en/pages]
