@@ -23,7 +23,7 @@
 
         .key-circle {
             fill-opacity: 0.8;
-            stroke: rgb(255, 255, 255);
+            stroke: black;
             stroke-width: 1px;
             cursor: pointer;
             outline: none;
@@ -140,7 +140,7 @@
         const group = svg.append("g");
 
 
-        group.selectAll("circle")
+            group.selectAll("circle")
             .data(keys)
             .enter()
             .append("circle")
@@ -179,12 +179,12 @@
 
         function shakeElement(element) {
             const originalTransform = element.attr("transform") || ""; // Get existing transform or set to empty
-            let shakeCount = 0; // Start from 0 shakes
+            let shakeCount = 1; // Start from 0 shakes
             const maxShakes = 10; // Number of shakes
 
             const interval = setInterval(() => {
-                const randomX = (Math.random() - 0.5) * 10; // Smaller jitter for controlled shake
-                const randomY = (Math.random() - 0.5) * 10;
+                const randomX = (Math.random() - 10.5) * 10; // Random jitter, increased range for visibility
+                const randomY = (Math.random() - 10.5) * 10;
                 element.attr("transform", `${originalTransform} translate(${randomX}, ${randomY})`);
 
                 shakeCount++;
@@ -192,9 +192,8 @@
                     clearInterval(interval);
                     element.attr("transform", originalTransform); // Reset to original position
                 }
-            }, 50); // Slightly slower interval for visible shaking
+            }, 1); // Delay between each shake, can be reduced to increase speed
         }
-
 
 
         function playMidiTone(midi) {

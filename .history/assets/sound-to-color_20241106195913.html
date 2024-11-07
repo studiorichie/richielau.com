@@ -13,84 +13,64 @@
             overflow: hidden;
         }
 
+
         .svg-container {
             display: flex;
-            justify-content: flex-start;
+            justify-content: center;
             align-items: center;
+            /* For vertical centering, remove this line if you only want horizontal centering */
             width: 100%;
+            /* Ensures container takes up the full width */
             overflow: hidden;
+        }
+
+        svg {
+            display: block;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .svg-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding: 10px;
+            /* Optional padding for spacing */
         }
 
         .key-circle {
             fill-opacity: 0.8;
-            stroke: rgb(255, 255, 255);
+            stroke: black;
             stroke-width: 1px;
             cursor: pointer;
             outline: none;
+            /* Remove any default focus outline */
             -webkit-tap-highlight-color: transparent;
-            transition: transform 0.2s, filter 0.2s, fill-opacity 0.2s;
+            /* Remove flash effect on tap for mobile */
+            transition: fill-opacity 0.2s, filter 0.2s;
+            /* Smooth transition for hover/press */
+            flex: 1 0 50px;
+            /* Minimum width for each circle before wrapping */
+            margin: 5px;
+            /* Space between circles */
+
         }
 
-        .key-circle[data-note="C"] {
-            transform: scale(0.98);
-        }
-
-        .key-circle[data-note="C#"] {
-            transform: scale(0.985);
-        }
-
-        .key-circle[data-note="D"] {
-            transform: scale(0.99);
-        }
-
-        .key-circle[data-note="D#"] {
-            transform: scale(0.992);
-        }
-
-        .key-circle[data-note="E"] {
-            transform: scale(0.993);
-        }
-
-        .key-circle[data-note="F"] {
-            transform: scale(0.994);
-        }
-
-        .key-circle[data-note="F#"] {
-            transform: scale(0.995);
-        }
-
-        .key-circle[data-note="G"] {
-            transform: scale(0.996);
-        }
-
-        .key-circle[data-note="G#"] {
-            transform: scale(0.997);
-        }
-
-        .key-circle[data-note="A"] {
-            transform: scale(0.998);
-        }
-
-        .key-circle[data-note="A#"] {
-            transform: scale(0.999);
-        }
-
-        /* Continue this slight scaling variation up to B */
-        .key-circle[data-note="B"] {
-            transform: scale(1.00);
-        }
-
-
-
+        /* Hover effect to make the circle slightly brighter */
         .key-circle:hover {
-            fill-opacity: 1;
             filter: brightness(1.2);
+            /* Increase brightness by 20% */
         }
 
+        /* Active/press effect to make the circle slightly darker */
         .key-circle:active {
-            transform: scale(0.995);
             filter: brightness(0.8);
+            /* Decrease brightness by 20% */
         }
+
+
 
         .label {
             font-size: 12px;
@@ -109,8 +89,11 @@
 
 <body>
     <div class="svg-container">
-        <svg width="950" height="600" id="chart"></svg>
+        <div class="svg-wrapper">
+            <svg width="950" height="600" id="chart"></svg>
+        </div>
     </div>
+
     <script>
         const keys = [
             { note: "C", freq: 261.63, midi: 60 },
@@ -127,17 +110,24 @@
             { note: "B", freq: 493.88, midi: 71 }
         ];
 
+
         function getColor(freq) {
             let hue = ((freq - 261) / (493 - 261)) * 360;
             return `hsl(${hue}, 100%, 50%)`;
         }
-
         const svg = d3.select("#chart");
-        const circleRadius = 30;
-        const padding = 15;
+        const width = svg.attr("width");
+        const height = svg.attr("height");
 
-        // Create the group for circles and labels
-        const group = svg.append("g");
+        const circleRadius = 30; // Radius of each circle
+        const padding = 15; // Space between circles
+
+        // Calculate the total width for the row of circles (number of circles * diameter + spaces between)
+        const totalRowWidth = (keys.length * (circleRadius * 2)) + ((keys.length - 1) * padding);
+
+
+        const group = svg.append("g")
+            .attr("transform", `translate(${(width - totalRowWidth) / 2 + circleRadius}, ${height / 2})`);
 
 
         group.selectAll("circle")
@@ -145,13 +135,13 @@
             .enter()
             .append("circle")
             .attr("class", "key-circle")
+            .attr("cx", (d, i) => i * (circleRadius * 2 + padding))
+            .attr("cy", 0) // Center vertically within the group
             .attr("r", circleRadius)
             .attr("fill", d => getColor(d.freq))
-            .attr("data-note", d => d.note)
             .on("click", function (event, d) {
                 showMidiLabel(d);
                 playMidiTone(d.midi);
-                shakeElement(d3.select(this)); // Apply shake effect
             });
 
 
@@ -160,41 +150,28 @@
             .enter()
             .append("text")
             .attr("class", "label")
+            .attr("x", (d, i) => i * (circleRadius * 2 + padding))
+            .attr("y", circleRadius + 20) // Position labels below each circle
             .text(d => `${d.note} (${Math.round(d.freq)} Hz)`)
             .attr("fill", "black");
 
+
         const midiLabel = svg.append("text")
-            .attr("class", "midi-label");
+            .attr("class", "midi-label")
+            .attr("x", width / 2)
+            .attr("y", height - 50);
 
         function showMidiLabel(data) {
             midiLabel.text(`MIDI: ${data.midi} - ${data.note}`)
-                .attr("x", svg.attr("width") / 2)
-                .attr("y", svg.attr("height") - 50)
+                .attr("x", (keys.indexOf(data) + 1) * (width / (keys.length + 1)))
+                .attr("y", height / 2 - 50)
                 .attr("visibility", "visible");
+
 
             setTimeout(() => {
                 midiLabel.attr("visibility", "hidden");
             }, 2000);
         }
-
-        function shakeElement(element) {
-            const originalTransform = element.attr("transform") || ""; // Get existing transform or set to empty
-            let shakeCount = 0; // Start from 0 shakes
-            const maxShakes = 10; // Number of shakes
-
-            const interval = setInterval(() => {
-                const randomX = (Math.random() - 0.5) * 10; // Smaller jitter for controlled shake
-                const randomY = (Math.random() - 0.5) * 10;
-                element.attr("transform", `${originalTransform} translate(${randomX}, ${randomY})`);
-
-                shakeCount++;
-                if (shakeCount >= maxShakes) { // Stop after reaching max shakes
-                    clearInterval(interval);
-                    element.attr("transform", originalTransform); // Reset to original position
-                }
-            }, 50); // Slightly slower interval for visible shaking
-        }
-
 
 
         function playMidiTone(midi) {
@@ -202,22 +179,18 @@
             const oscillator = context.createOscillator();
             const gainNode = context.createGain();
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(440 * Math.pow(2, (midi - 69) / 12), context.currentTime);
+            oscillator.frequency.setValueAtTime(440 * Math.pow(2, (midi - 69) / 12), context.currentTime); // MIDI to Hz
             gainNode.gain.setValueAtTime(0.1, context.currentTime);
             oscillator.connect(gainNode).connect(context.destination);
             oscillator.start();
             oscillator.stop(context.currentTime + 0.5);
         }
 
-
-
-
-
-
-
         function adjustCircleLayout() {
             const svgWidth = document.getElementById("chart").clientWidth;
-            const circlesPerRow = Math.max(1, Math.floor(svgWidth / (circleRadius * 2 + padding)));
+            const circleRadius = 30;
+            const padding = 15;
+            const circlesPerRow = Math.max(1, Math.floor(svgWidth / (circleRadius * 2 + padding))); // Minimum of 1 circle per row
 
             d3.select("#chart")
                 .selectAll("circle")
@@ -230,8 +203,12 @@
                 .attr("y", (d, i) => Math.floor(i / circlesPerRow) * (circleRadius * 2 + padding) + circleRadius + 50);
         }
 
+        // Call adjustCircleLayout on page load and resize
         adjustCircleLayout();
         window.addEventListener("resize", adjustCircleLayout);
+
+
+
     </script>
 </body>
 

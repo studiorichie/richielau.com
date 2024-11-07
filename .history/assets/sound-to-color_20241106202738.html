@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Sound-to-Color Mapping with MIDI</title>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <style>
-        body,
-        html {
+        body, html {
             margin: 0;
             padding: 0;
             overflow: hidden;
         }
-
         .svg-container {
             display: flex;
             justify-content: flex-start;
@@ -20,10 +17,9 @@
             width: 100%;
             overflow: hidden;
         }
-
         .key-circle {
             fill-opacity: 0.8;
-            stroke: rgb(255, 255, 255);
+            stroke: black;
             stroke-width: 1px;
             cursor: pointer;
             outline: none;
@@ -31,72 +27,14 @@
             transition: transform 0.2s, filter 0.2s, fill-opacity 0.2s;
         }
 
-        .key-circle[data-note="C"] {
-            transform: scale(0.98);
-        }
-
-        .key-circle[data-note="C#"] {
-            transform: scale(0.985);
-        }
-
-        .key-circle[data-note="D"] {
-            transform: scale(0.99);
-        }
-
-        .key-circle[data-note="D#"] {
-            transform: scale(0.992);
-        }
-
-        .key-circle[data-note="E"] {
-            transform: scale(0.993);
-        }
-
-        .key-circle[data-note="F"] {
-            transform: scale(0.994);
-        }
-
-        .key-circle[data-note="F#"] {
-            transform: scale(0.995);
-        }
-
-        .key-circle[data-note="G"] {
-            transform: scale(0.996);
-        }
-
-        .key-circle[data-note="G#"] {
-            transform: scale(0.997);
-        }
-
-        .key-circle[data-note="A"] {
-            transform: scale(0.998);
-        }
-
-        .key-circle[data-note="A#"] {
-            transform: scale(0.999);
-        }
-
-        /* Continue this slight scaling variation up to B */
-        .key-circle[data-note="B"] {
-            transform: scale(1.00);
-        }
-
-
-
-        .key-circle:hover {
-            fill-opacity: 1;
-            filter: brightness(1.2);
-        }
-
         .key-circle:active {
-            transform: scale(0.995);
+            transform: scale(0.9);
             filter: brightness(0.8);
         }
-
         .label {
             font-size: 12px;
             text-anchor: middle;
         }
-
         .midi-label {
             font-size: 14px;
             font-weight: bold;
@@ -111,6 +49,7 @@
     <div class="svg-container">
         <svg width="950" height="600" id="chart"></svg>
     </div>
+
     <script>
         const keys = [
             { note: "C", freq: 261.63, midi: 60 },
@@ -136,9 +75,8 @@
         const circleRadius = 30;
         const padding = 15;
 
-        // Create the group for circles and labels
+        // Add circles and labels without pre-defining cx and cy
         const group = svg.append("g");
-
 
         group.selectAll("circle")
             .data(keys)
@@ -147,13 +85,10 @@
             .attr("class", "key-circle")
             .attr("r", circleRadius)
             .attr("fill", d => getColor(d.freq))
-            .attr("data-note", d => d.note)
             .on("click", function (event, d) {
                 showMidiLabel(d);
                 playMidiTone(d.midi);
-                shakeElement(d3.select(this)); // Apply shake effect
             });
-
 
         group.selectAll(".label")
             .data(keys)
@@ -177,26 +112,6 @@
             }, 2000);
         }
 
-        function shakeElement(element) {
-            const originalTransform = element.attr("transform") || ""; // Get existing transform or set to empty
-            let shakeCount = 0; // Start from 0 shakes
-            const maxShakes = 10; // Number of shakes
-
-            const interval = setInterval(() => {
-                const randomX = (Math.random() - 0.5) * 10; // Smaller jitter for controlled shake
-                const randomY = (Math.random() - 0.5) * 10;
-                element.attr("transform", `${originalTransform} translate(${randomX}, ${randomY})`);
-
-                shakeCount++;
-                if (shakeCount >= maxShakes) { // Stop after reaching max shakes
-                    clearInterval(interval);
-                    element.attr("transform", originalTransform); // Reset to original position
-                }
-            }, 50); // Slightly slower interval for visible shaking
-        }
-
-
-
         function playMidiTone(midi) {
             const context = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = context.createOscillator();
@@ -208,12 +123,6 @@
             oscillator.start();
             oscillator.stop(context.currentTime + 0.5);
         }
-
-
-
-
-
-
 
         function adjustCircleLayout() {
             const svgWidth = document.getElementById("chart").clientWidth;
@@ -234,5 +143,4 @@
         window.addEventListener("resize", adjustCircleLayout);
     </script>
 </body>
-
 </html>

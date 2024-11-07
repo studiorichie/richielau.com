@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Microtonal 12x12 Frequency Grid</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        .frequency-cell {
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+
+        .frequency-cell:hover {
+            filter: brightness(1.2);
+        }
+
+        .label {
+            fill: rgb(166, 166, 166);
+            font-size: 12px;
+            text-anchor: middle;
+            user-select: none;
+            /* Prevents text selection */
+            pointer-events: none;
+            /* Makes labels non-interactive to clicks */
+        }
+    </style>
+</head>
+
+<body>
+    <svg width="800" height="800" id="grid"></svg>
+
+    <script>
+        // Base frequency for C4
+        const baseFreq = 261.63; // Frequency of C4 in Hz
+        const stepsPerOctave = 144; // Microtonal steps per octave
+        const factor = Math.pow(2, 1 / stepsPerOctave); // Factor for each step
+
+        // Grid dimensions
+        const minFreq = 100;  // Set this to the minimum frequency of your range
+        const maxFreq = 5000; // Set this to the maximum frequency of your range
+
+        const svg = d3.select("#chart");
+        const numRows = 12;
+        const numCols = 12;
+        const cellSize = 40;
+        const padding = 5;
+
+        // Generate grid with unique frequencies
+        svg.selectAll("rect")
+            .data(d3.range(numRows * numCols))
+            .enter()
+            .append("rect")
+            .attr("x", (d, i) => (i % numCols) * (cellSize + padding))
+            .attr("y", (d, i) => Math.floor(i / numCols) * (cellSize + padding))
+            .attr("width", cellSize)
+            .attr("height", cellSize)
+            .attr("fill", (d, i) => {
+                const freq = minFreq + (i / (numRows * numCols - 1)) * (maxFreq - minFreq);
+                return getColor(freq, minFreq, maxFreq);
+            })
+            .on("click", function (d, i) {
+                const freq = minFreq + (i / (numRows * numCols - 1)) * (maxFreq - minFreq);
+                playFrequency(freq);
+            });
+
+
+        function playFrequency(freq) {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(freq, context.currentTime);
+            oscillator.connect(context.destination);
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.5);
+        }
+
+
+        // Create an array to hold all frequencies
+        const frequencies = [];
+        for (let i = 0; i < rows * cols; i++) {
+            const frequency = baseFreq * Math.pow(factor, i); // Calculate frequency
+            frequencies.push(frequency);
+        }
+
+        // Define color scale based on frequency range
+        const colorScale = d3.scaleSequential()
+            .domain([frequencies[0], frequencies[frequencies.length - 1]])
+            .interpolator(d3.interpolateGreys); // Use a grayscale color map for brightness
+
+
+
+        // Add cells to the grid
+        svg.selectAll(".frequency-cell")
+            .data(frequencies)
+            .enter()
+            .append("rect")
+            .attr("class", "frequency-cell")
+            .attr("x", (d, i) => (i % cols) * (cellSize + padding))
+            .attr("y", (d, i) => Math.floor(i / cols) * (cellSize + padding))
+            .attr("width", cellSize)
+            .attr("height", cellSize)
+            .attr("fill", d => colorScale(d))
+            .on("click", function (event, freq) {
+                playTone(freq); // Play the tone on click
+            });
+
+        // Add frequency labels to each cell
+        svg.selectAll(".label")
+            .data(frequencies)
+            .enter()
+            .append("text")
+            .attr("class", "label")
+            .attr("x", (d, i) => (i % cols) * (cellSize + padding) + cellSize / 2)
+            .attr("y", (d, i) => Math.floor(i / cols) * (cellSize + padding) + cellSize / 2 + 4)
+            .text(d => d.toFixed(1)) // Round frequency for readability
+            .attr("fill", d => d > 400 ? "black" : "white"); // Adjust text color based on brightness
+
+        // Function to play the tone for a given frequency
+        function playTone(frequency) {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(frequency, context.currentTime);
+            gainNode.gain.setValueAtTime(0.1, context.currentTime);
+
+            oscillator.connect(gainNode).connect(context.destination);
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.5); // Play for half a second
+        }
+
+        function getColor(freq, minFreq, maxFreq) {
+            // Map frequency to a hue on a scale from 0 to 360 degrees
+            const hue = ((freq - minFreq) / (maxFreq - minFreq)) * 360;
+
+            // Adjust lightness based on frequency for visual clarity
+            const lightness = 40 + ((freq - minFreq) / (maxFreq - minFreq)) * 20; // Lightness between 40-60%
+
+            // Return HSL color
+            return `hsl(${hue}, 100%, ${lightness}%)`;
+        }
+
+
+
+    </script>
+</body>
+
+</html>

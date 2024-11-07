@@ -16,80 +16,39 @@
         .svg-container {
             display: flex;
             justify-content: flex-start;
+            /* Align to the left */
             align-items: center;
             width: 100%;
             overflow: hidden;
         }
 
+        svg {
+            display: block;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
         .key-circle {
             fill-opacity: 0.8;
-            stroke: rgb(255, 255, 255);
+            stroke: black;
             stroke-width: 1px;
             cursor: pointer;
             outline: none;
             -webkit-tap-highlight-color: transparent;
-            transition: transform 0.2s, filter 0.2s, fill-opacity 0.2s;
+            transition: fill-opacity 0.2s, filter 0.2s;
+            /* Smooth transition for hover/press */
         }
-
-        .key-circle[data-note="C"] {
-            transform: scale(0.98);
-        }
-
-        .key-circle[data-note="C#"] {
-            transform: scale(0.985);
-        }
-
-        .key-circle[data-note="D"] {
-            transform: scale(0.99);
-        }
-
-        .key-circle[data-note="D#"] {
-            transform: scale(0.992);
-        }
-
-        .key-circle[data-note="E"] {
-            transform: scale(0.993);
-        }
-
-        .key-circle[data-note="F"] {
-            transform: scale(0.994);
-        }
-
-        .key-circle[data-note="F#"] {
-            transform: scale(0.995);
-        }
-
-        .key-circle[data-note="G"] {
-            transform: scale(0.996);
-        }
-
-        .key-circle[data-note="G#"] {
-            transform: scale(0.997);
-        }
-
-        .key-circle[data-note="A"] {
-            transform: scale(0.998);
-        }
-
-        .key-circle[data-note="A#"] {
-            transform: scale(0.999);
-        }
-
-        /* Continue this slight scaling variation up to B */
-        .key-circle[data-note="B"] {
-            transform: scale(1.00);
-        }
-
-
 
         .key-circle:hover {
             fill-opacity: 1;
-            filter: brightness(1.2);
+            transform: scale(1.1);
+            /* Slightly enlarge the circle on hover */
         }
 
         .key-circle:active {
-            transform: scale(0.995);
-            filter: brightness(0.8);
+            fill-opacity: 0.6;
+            transform: scale(0.9);
+            /* Slightly shrink the circle on press */
         }
 
         .label {
@@ -111,6 +70,7 @@
     <div class="svg-container">
         <svg width="950" height="600" id="chart"></svg>
     </div>
+
     <script>
         const keys = [
             { note: "C", freq: 261.63, midi: 60 },
@@ -133,69 +93,56 @@
         }
 
         const svg = d3.select("#chart");
+        const width = svg.attr("width");
+        const height = svg.attr("height");
+
         const circleRadius = 30;
         const padding = 15;
 
-        // Create the group for circles and labels
-        const group = svg.append("g");
+        // Create group container with no centering to align circles to the left
+        const group = svg.append("g")
+            .attr("transform", `translate(0, ${height / 2})`);
 
-
+        // Add circles and labels
         group.selectAll("circle")
             .data(keys)
             .enter()
             .append("circle")
             .attr("class", "key-circle")
+            .attr("cx", (d, i) => i * (circleRadius * 2 + padding))
+            .attr("cy", 0)
             .attr("r", circleRadius)
             .attr("fill", d => getColor(d.freq))
-            .attr("data-note", d => d.note)
             .on("click", function (event, d) {
                 showMidiLabel(d);
                 playMidiTone(d.midi);
-                shakeElement(d3.select(this)); // Apply shake effect
             });
-
 
         group.selectAll(".label")
             .data(keys)
             .enter()
             .append("text")
             .attr("class", "label")
+            .attr("x", (d, i) => i * (circleRadius * 2 + padding))
+            .attr("y", circleRadius + 20)
             .text(d => `${d.note} (${Math.round(d.freq)} Hz)`)
             .attr("fill", "black");
 
         const midiLabel = svg.append("text")
-            .attr("class", "midi-label");
+            .attr("class", "midi-label")
+            .attr("x", width / 2)
+            .attr("y", height - 50);
 
         function showMidiLabel(data) {
             midiLabel.text(`MIDI: ${data.midi} - ${data.note}`)
-                .attr("x", svg.attr("width") / 2)
-                .attr("y", svg.attr("height") - 50)
+                .attr("x", (keys.indexOf(data) + 1) * (circleRadius * 2 + padding))
+                .attr("y", height / 2 - 50)
                 .attr("visibility", "visible");
 
             setTimeout(() => {
                 midiLabel.attr("visibility", "hidden");
             }, 2000);
         }
-
-        function shakeElement(element) {
-            const originalTransform = element.attr("transform") || ""; // Get existing transform or set to empty
-            let shakeCount = 0; // Start from 0 shakes
-            const maxShakes = 10; // Number of shakes
-
-            const interval = setInterval(() => {
-                const randomX = (Math.random() - 0.5) * 10; // Smaller jitter for controlled shake
-                const randomY = (Math.random() - 0.5) * 10;
-                element.attr("transform", `${originalTransform} translate(${randomX}, ${randomY})`);
-
-                shakeCount++;
-                if (shakeCount >= maxShakes) { // Stop after reaching max shakes
-                    clearInterval(interval);
-                    element.attr("transform", originalTransform); // Reset to original position
-                }
-            }, 50); // Slightly slower interval for visible shaking
-        }
-
-
 
         function playMidiTone(midi) {
             const context = new (window.AudioContext || window.webkitAudioContext)();
@@ -208,12 +155,6 @@
             oscillator.start();
             oscillator.stop(context.currentTime + 0.5);
         }
-
-
-
-
-
-
 
         function adjustCircleLayout() {
             const svgWidth = document.getElementById("chart").clientWidth;

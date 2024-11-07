@@ -23,7 +23,7 @@
 
         .key-circle {
             fill-opacity: 0.8;
-            stroke: rgb(255, 255, 255);
+            stroke: black;
             stroke-width: 1px;
             cursor: pointer;
             outline: none;
@@ -139,7 +139,6 @@
         // Create the group for circles and labels
         const group = svg.append("g");
 
-
         group.selectAll("circle")
             .data(keys)
             .enter()
@@ -177,26 +176,6 @@
             }, 2000);
         }
 
-        function shakeElement(element) {
-            const originalTransform = element.attr("transform") || ""; // Get existing transform or set to empty
-            let shakeCount = 0; // Start from 0 shakes
-            const maxShakes = 10; // Number of shakes
-
-            const interval = setInterval(() => {
-                const randomX = (Math.random() - 0.5) * 10; // Smaller jitter for controlled shake
-                const randomY = (Math.random() - 0.5) * 10;
-                element.attr("transform", `${originalTransform} translate(${randomX}, ${randomY})`);
-
-                shakeCount++;
-                if (shakeCount >= maxShakes) { // Stop after reaching max shakes
-                    clearInterval(interval);
-                    element.attr("transform", originalTransform); // Reset to original position
-                }
-            }, 50); // Slightly slower interval for visible shaking
-        }
-
-
-
         function playMidiTone(midi) {
             const context = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = context.createOscillator();
@@ -209,10 +188,39 @@
             oscillator.stop(context.currentTime + 0.5);
         }
 
+        function shakeElement(element) {
+            const originalTransform = element.attr("transform") || ""; // Get existing transform or set to empty
+            let shakeCount = 1; // Start from 0 shakes
+            const maxShakes = 10; // Number of shakes
+
+            const interval = setInterval(() => {
+                const randomX = (Math.random() - 0.5) * 10; // Random jitter, increased range for visibility
+                const randomY = (Math.random() - 0.5) * 10;
+                element.attr("transform", `${originalTransform} translate(${randomX}, ${randomY})`);
+
+                shakeCount++;
+                if (shakeCount >= maxShakes) { // Stop after reaching max shakes
+                    clearInterval(interval);
+                    element.attr("transform", originalTransform); // Reset to original position
+                }
+            }, .1); // Delay between each shake, can be reduced to increase speed
+        }
 
 
 
-
+        group.selectAll("key-circle")
+            .data(keys)
+            .enter()
+            .append("key-circle")
+            .attr("class", "key-circle")
+            .attr("r", circleRadius)
+            .attr("fill", d => getColor(d.freq))
+            .attr("data-note", d => d.note)
+            .on("click", function (event, d) {
+                showMidiLabel(d);
+                playMidiTone(d.midi);
+                shakeElement(d3.select(this)); // Apply shake effect
+            });
 
 
         function adjustCircleLayout() {

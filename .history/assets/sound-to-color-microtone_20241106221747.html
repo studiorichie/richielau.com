@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Microtonal 12x12 Frequency Grid</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        .frequency-cell {
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+
+        .frequency-cell:hover {
+            filter: brightness(1.2);
+        }
+
+        .label {
+            fill: rgb(255, 255, 255);
+            font-size: 12px;
+            text-anchor: middle;
+            user-select: none;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <svg width="800" height="800" id="grid"></svg>
+
+    <script>
+        // Constants for the grid
+        const minFreq = 100;  // Minimum frequency
+        const maxFreq = 5000; // Maximum frequency
+        const numRows = 12;
+        const numCols = 12;
+        const cellSize = 60;
+        const padding = 5;
+
+        // Select the SVG container
+        const svg = d3.select("#grid");
+
+        // Generate unique frequencies for each cell in the grid
+        const frequencies = d3.range(numRows * numCols).map(i => {
+            return minFreq + (i / (numRows * numCols - 1)) * (maxFreq - minFreq);
+        });
+
+        // Define color scale based on frequency range
+        const colorScale = d3.scaleSequential()
+            .domain([minFreq, maxFreq])
+            .interpolator(d3.interpolateRainbow); // Use a rainbow color map for varied hues
+
+        // Add cells to the grid
+        svg.selectAll(".frequency-cell")
+            .data(frequencies)
+            .enter()
+            .append("rect")
+            .attr("class", "frequency-cell")
+            .attr("x", (d, i) => (i % numCols) * (cellSize + padding))
+            .attr("y", (d, i) => Math.floor(i / numCols) * (cellSize + padding))
+            .attr("width", cellSize)
+            .attr("height", cellSize)
+            .attr("fill", d => getColor(d, minFreq, maxFreq))
+            .on("click", function (event, freq) {
+                playTone(freq); // Play the tone on click
+            });
+
+        // Add frequency labels to each cell
+        svg.selectAll(".label")
+            .data(frequencies)
+            .enter()
+            .append("text")
+            .attr("class", "label")
+            .attr("x", (d, i) => (i % numCols) * (cellSize + padding) + cellSize / 2)
+            .attr("y", (d, i) => Math.floor(i / numCols) * (cellSize + padding) + cellSize / 2 + 4)
+            .text(d => d.toFixed(1)) // Round frequency for readability
+            .attr("fill", d => d > 3000 ? "black" : "white"); // Adjust text color based on brightness
+
+        // Function to play the tone for a given frequency
+        function playTone(frequency) {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(frequency, context.currentTime);
+            gainNode.gain.setValueAtTime(0.1, context.currentTime);
+
+            oscillator.connect(gainNode).connect(context.destination);
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.5); // Play for half a second
+        }
+
+        // Function to calculate color based on frequency
+        function getColor(freq, minFreq, maxFreq) {
+            // Map frequency to a hue on a scale from 0 to 360 degrees
+            const hue = ((freq - minFreq) / (maxFreq - minFreq)) * 360;
+
+            // Adjust lightness based on frequency for visual clarity
+            const lightness = 50 + ((freq - minFreq) / (maxFreq - minFreq)) * 10; // Lightness between 50-60%
+
+            // Return HSL color
+            return `hsl(${hue}, 100%, ${lightness}%)`;
+        }
+    </script>
+</body>
+
+</html>

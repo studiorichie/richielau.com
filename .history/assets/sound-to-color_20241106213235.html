@@ -215,23 +215,6 @@
 
 
 
-        function adjustCircleLayout() {
-            const svgWidth = document.getElementById("chart").clientWidth;
-            const circlesPerRow = Math.max(1, Math.floor(svgWidth / (circleRadius * 2 + padding)));
-
-            d3.select("#chart")
-                .selectAll("circle")
-                .attr("cx", (d, i) => (i % circlesPerRow) * (circleRadius * 2 + padding) + circleRadius)
-                .attr("cy", (d, i) => Math.floor(i / circlesPerRow) * (circleRadius * 2 + padding) + circleRadius);
-
-            d3.select("#chart")
-                .selectAll(".label")
-                .attr("x", (d, i) => (i % circlesPerRow) * (circleRadius * 2 + padding) + circleRadius)
-                .attr("y", (d, i) => Math.floor(i / circlesPerRow) * (circleRadius * 2 + padding) + circleRadius + 50);
-        }
-
-        adjustCircleLayout();
-        window.addEventListener("resize", adjustCircleLayout);
     </script>
 </body>
 
