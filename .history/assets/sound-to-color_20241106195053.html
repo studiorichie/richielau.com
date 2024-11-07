@@ -49,8 +49,6 @@
             /* Remove any default focus outline */
             -webkit-tap-highlight-color: transparent;
             /* Remove flash effect on tap for mobile */
-            transition: fill-opacity 0.2s, filter 0.2s;
-            /* Smooth transition for hover/press */
             flex: 1 0 50px;
             /* Minimum width for each circle before wrapping */
             margin: 5px;
@@ -58,17 +56,6 @@
 
         }
 
-        /* Hover effect to make the circle slightly brighter */
-        .key-circle:hover {
-            filter: brightness(1.2);
-            /* Increase brightness by 20% */
-        }
-
-        /* Active/press effect to make the circle slightly darker */
-        .key-circle:active {
-            filter: brightness(0.8);
-            /* Decrease brightness by 20% */
-        }
 
 
 
