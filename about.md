@@ -20,6 +20,7 @@ At StudioRich, we’re all about merging art with functionality, code with cultu
 - `Trackstar`: Bringing the sounds of New York to life, Trackstar is a location-based music app that combines curated playlists with real-time transit data, transforming commutes into audio journeys through the city. Sign up at [trackstar.nyc](trackstar.nyc)
 - `Urban Visualizer`: A live, dynamic view of transit data that turns city movements into digital murals—a tribute to the flow and pulse of urban life.
 - `Interactive Street Art`: A fusion of graffiti and digital media, adding depth to city walls and telling stories with every surface.
+- `Hello, My Name Is... Sticker App`: A fun, customizable digital sticker tool that lets you design and share your own “Hello, My Name Is…” stickers. Try it out and explore more on [StudioRich](https://studiorich.shop).
 
 These projects are just a glimpse into the work we do at [StudioRich](http://studioirich.shop).
 

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sound-to-Color Mapping with MIDI</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh; /* Full viewport height for vertical centering */
+            background-color: lightblue; /* Optional background for visibility */
+        }
+        svg {
+            display: block;
+            overflow: visible;
+        }
+        .key-circle {
+            fill-opacity: 0.8;
+            stroke: black;
+            stroke-width: 1px;
+            cursor: pointer;
+        }
+        .label {
+            font-size: 12px;
+            text-anchor: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="svg-container">
+        <svg width="950" height="600" id="chart"></svg>
+    </div>
+
+    <script>
+        const keys = [
+            { note: "C", freq: 261.63, midi: 60 },
+            { note: "C#", freq: 277.18, midi: 61 },
+            { note: "D", freq: 293.66, midi: 62 },
+            { note: "D#", freq: 311.13, midi: 63 },
+            { note: "E", freq: 329.63, midi: 64 },
+            { note: "F", freq: 349.23, midi: 65 },
+            { note: "F#", freq: 369.99, midi: 66 },
+            { note: "G", freq: 392.00, midi: 67 },
+            { note: "G#", freq: 415.30, midi: 68 },
+            { note: "A", freq: 440.00, midi: 69 },
+            { note: "A#", freq: 466.16, midi: 70 },
+            { note: "B", freq: 493.88, midi: 71 }
+        ];
+
+        function getColor(freq) {
+            let hue = ((freq - 261) / (493 - 261)) * 360;
+            return `hsl(${hue}, 100%, 50%)`;
+        }
+
+        const svg = d3.select("#chart");
+        const width = svg.attr("width");
+        const height = svg.attr("height");
+
+        const circleRadius = 30; // Radius of each circle
+        const padding = 15; // Space between circles
+
+        // Calculate the total width for the row of circles
+        const totalRowWidth = (keys.length * (circleRadius * 2)) + ((keys.length - 1) * padding);
+
+        const group = svg.append("g")
+            .attr("transform", `translate(${(width - totalRowWidth) / 2 + circleRadius}, ${height / 2})`);
+
+        group.selectAll("circle")
+            .data(keys)
+            .enter()
+            .append("circle")
+            .attr("class", "key-circle")
+            .attr("cx", (d, i) => i * (circleRadius * 2 + padding))
+            .attr("cy", 0)
+            .attr("r", circleRadius)
+            .attr("fill", d => getColor(d.freq));
+
+        group.selectAll(".label")
+            .data(keys)
+            .enter()
+            .append("text")
+            .attr("class", "label")
+            .attr("x", (d, i) => i * (circleRadius * 2 + padding))
+            .attr("y", circleRadius + 20)
+            .text(d => `${d.note} (${Math.round(d.freq)} Hz)`)
+            .attr("fill", "black");
+    </script>
+</body>
+</html>
