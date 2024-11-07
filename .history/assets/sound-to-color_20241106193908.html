@@ -30,27 +30,13 @@
             overflow: hidden;
         }
 
-        .svg-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            padding: 10px;
-            /* Optional padding for spacing */
-        }
-
         .key-circle {
             fill-opacity: 0.8;
             stroke: black;
             stroke-width: 1px;
             cursor: pointer;
-            outline: none;
-            /* Remove any default focus outline */
-            -webkit-tap-highlight-color: transparent;
-            /* Remove flash effect on tap for mobile */
-            flex: 1 0 50px; /* Minimum width for each circle before wrapping */
-            margin: 5px; /* Space between circles */
+            outline: none; /* Remove any default focus outline */
+    -webkit-tap-highlight-color: transparent; /* Remove flash effect on tap for mobile */
 
         }
 
@@ -74,9 +60,7 @@
 
 <body>
     <div class="svg-container">
-        <div class="svg-wrapper">
-            <svg width="950" height="600" id="chart"></svg>
-        </div>
+        <svg width="950" height="600" id="chart"></svg>
     </div>
 
     <script>
