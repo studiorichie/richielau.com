@@ -12,6 +12,8 @@ categories: robotic lunar exploration sustainable moon colonization lunar infras
 This project outlines a bold and innovative plan to establish a sustainable lunar base using advanced robotics and multipurpose rocket technology. The concept reimagines the current Artemis program strategy, prioritizing robotic groundwork and leveraging the rocket as a tunneling device to create expansive underground shelters. This approach ensures the Moon is ready for human arrival with essential infrastructure, life-support systems, and a safe environment already in place.
 
 ---
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/1rW6V2ut0yjbIpDKnhdv9l?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+---
 
 ## Key Objectives
 
