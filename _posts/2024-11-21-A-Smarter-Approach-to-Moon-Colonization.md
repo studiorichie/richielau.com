@@ -6,8 +6,6 @@ categories: robotic lunar exploration sustainable moon colonization lunar infras
 ---
 
 
-# Lunar Base Development Plan: A Smarter Approach to Moon Colonization
-
 ![Moonbase Draft Image](/assets/images/rocket-tunnel-maker.webp)
 
 ## Overview
