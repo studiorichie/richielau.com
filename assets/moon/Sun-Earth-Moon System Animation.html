@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sun-Earth-Moon System Animation</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: black;
+      overflow: hidden;
+    }
+    .sun {
+      width: 100px;
+      height: 100px;
+      background-color: yellow;
+      border-radius: 50%;
+      position: absolute;
+    }
+    .earth {
+      width: 30px;
+      height: 30px;
+      background-color: blue;
+      border-radius: 50%;
+      position: absolute;
+    }
+    .moon {
+      width: 8px;
+      height: 8px;
+      background-color: gray;
+      border-radius: 50%;
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+  <div class="sun"></div>
+  <div class="earth"></div>
+  <div class="moon"></div>
+  <script>
+    const sun = document.querySelector('.sun');
+    const earth = document.querySelector('.earth');
+    const moon = document.querySelector('.moon');
+
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+
+    const earthOrbitRadius = 200; // Distance from Sun to Earth
+    const moonOrbitRadius = 40;   // Distance from Earth to Moon
+
+    let earthAngle = 0;
+    let moonAngle = 0;
+
+    function animate() {
+      // Earth's position
+      const earthX = centerX + earthOrbitRadius * Math.cos(earthAngle);
+      const earthY = centerY + earthOrbitRadius * Math.sin(earthAngle);
+      earth.style.left = `${earthX - 15}px`; // Subtract half of Earth's width
+      earth.style.top = `${earthY - 15}px}`; // Subtract half of Earth's height
+
+      // Moon's position relative to Earth
+      const moonX = earthX + moonOrbitRadius * Math.cos(moonAngle);
+      const moonY = earthY + moonOrbitRadius * Math.sin(moonAngle);
+      moon.style.left = `${moonX - 4}px`; // Subtract half of Moon's width
+      moon.style.top = `${moonY - 4}px`;  // Subtract half of Moon's height
+
+      // Increment angles
+      earthAngle += 0.01; // Adjust for desired speed
+      moonAngle += 0.05;  // Moon orbits faster around Earth
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>

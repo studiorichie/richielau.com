@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Tone Generator</title>
+</head>
+<body>
+  <label for="frequency">Enter Frequency (Hz):</label>
+  <input type="number" id="frequency" value="440" min="20" max="20000">
+  <button id="playButton">Play Tone</button>
+  <button id="stopButton">Stop Tone</button>
+
+  <script>
+    let audioContext;
+    let oscillator;
+
+    document.getElementById('playButton').addEventListener('click', () => {
+      const frequency = parseFloat(document.getElementById('frequency').value);
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (!oscillator) {
+        oscillator = audioContext.createOscillator();
+        oscillator.type = 'square'; // Waveform type: 'sine', 'square', 'sawtooth', 'triangle'
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        oscillator.connect(audioContext.destination);
+        oscillator.start();
+      }
+    });
+
+    document.getElementById('stopButton').addEventListener('click', () => {
+      if (oscillator) {
+        oscillator.stop();
+        oscillator.disconnect();
+        oscillator = null;
+      }
+    });
+  </script>
+</body>
+</html>

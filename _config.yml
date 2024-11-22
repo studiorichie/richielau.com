@@ -1,3 +1,4 @@
+
 # Welcome to Jekyll!
 #
 # This config file is meant for settings that affect your whole blog, values
@@ -29,6 +30,9 @@ url: "http://richielau.com" # the base hostname & protocol for your site, e.g. h
 twitter_username: richielau
 github_username:  studiorichie
 instagram_username: richielau
+
+# _config.yml
+image_path: "/assets/images"
 
 
 # Build settings

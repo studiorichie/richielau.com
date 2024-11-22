@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Amen-Style Break</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.39/Tone.js"></script>
+</head>
+
+<body>
+    <button onclick="playAmenStyleBreak()">Play Amen-Style Break</button>
+    <button onclick="stopAmenStyleBreak()">Stop Break</button>
+    <script>
+        // Define drum sounds using Tone.js
+        // Define layered drum sounds using Tone.js
+        const kick = new Tone.MembraneSynth({
+            pitchDecay: 0.05,
+            octaves: 4,
+            oscillator: { type: "sine" },
+            envelope: { attack: 0.001, decay: 0.5, sustain: 0, release: 0.1 }
+        }).toDestination();
+
+        const snare = new Tone.NoiseSynth({
+            noise: { type: "white" },
+            envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 }
+        }).toDestination();
+
+        const hihat = new Tone.MetalSynth({
+            frequency: 600,
+            envelope: { attack: 0.001, decay: 0.1, release: 0.1 },
+            harmonicity: 5.1,
+            modulationIndex: 32
+        }).toDestination();
+
+        // Add a touch of reverb and compression for depth
+        const reverb = new Tone.Reverb(0.5).toDestination();
+        const compressor = new Tone.Compressor(-30, 3).toDestination();
+
+        // Route drums through effects for added depth
+        kick.connect(reverb);
+        snare.connect(reverb);
+        hihat.connect(reverb);
+        reverb.connect(compressor);
+
+        // Define an improved Amen-style break pattern with layering
+        const amenPattern = [
+            ["kick", null, "snare", null],  // Step 1
+            [null, "hihat", "ghostSnare", "snare"], // Step 2
+            ["kick", "hihat", null, "kick"],  // Step 3
+            [null, "ghostSnare", "snare", null]  // Step 4
+        ];
+
+        // Adjusted function to play the pattern at 170 BPM with layered sounds
+        function playAmenStyleBreak() {
+            Tone.start();
+            Tone.Transport.cancel();
+            Tone.Transport.bpm.value = 170;
+            Tone.Transport.start();
+
+            // Schedule each beat in the 4x4 grid with extra depth
+            amenPattern.forEach((row, rowIndex) => {
+                row.forEach((sound, step) => {
+                    Tone.Transport.schedule(time => {
+                        if (sound === "kick") kick.triggerAttackRelease("C1", "8n", time);
+                        if (sound === "snare") snare.triggerAttackRelease("16n", time);
+                        if (sound === "ghostSnare") snare.triggerAttackRelease("16n", time, 0.3); // quieter ghost snare
+                        if (sound === "hihat") hihat.triggerAttackRelease("8n", time);
+                    }, `0:${rowIndex}:${step}`);
+                });
+            });
+
+            // Loop the pattern for seamless playback
+            Tone.Transport.loop = true;
+            Tone.Transport.loopEnd = "1m";
+        }
+
+        function stopAmenStyleBreak() {
+            Tone.Transport.stop();
+        }
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Step Sequencer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.39/Tone.js"></script>
+</head>
+<body>
+  <button id="startButton">Start Sequencer</button>
+  <button id="stopButton">Stop Sequencer</button>
+  <script>
+
+// Create a synth
+const synth = new Tone.Synth();
+
+// Create a FeedbackDelay effect
+const feedbackDelay = new Tone.FeedbackDelay("8n", 0.5).toDestination();
+const distortion = new Tone.Distortion(0.8).toDestination();
+
+// Connect the synth to the delay effect
+synth.connect(feedbackDelay);
+// Connect the synth to the distortion effect
+synth.connect(distortion);
+
+
+
+
+// Trigger a note with the delay effect
+synth.triggerAttackRelease("E4", "8n");
+
+
+// Define the notes of the sequence
+const notes = ["C4", "E4", "G4", "B4", "C5"];
+
+// Create a new sequence with the synth and notes
+const seq = new Tone.Sequence(
+  (time, note) => {
+    synth.triggerAttackRelease(note, "8n", time);
+  },
+  notes,
+  "4n"
+);
+
+// Start the Transport to hear the sequence
+document.getElementById("startButton").addEventListener("click", async () => {
+  await Tone.start(); // Required to start the audio context
+  Tone.Transport.start();
+  seq.start();
+});
+
+// Stop the Transport to stop the sequence
+document.getElementById("stopButton").addEventListener("click", () => {
+  seq.stop();
+  Tone.Transport.stop();
+});
+
+
+  </script>
+</body>
+</html>

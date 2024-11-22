@@ -29,7 +29,6 @@ Below, you'll find an interactive grid that allows you to dive into these subtle
     <iframe src="/assets/sound-to-color-microtone" width="800" height="800" frameborder="0"></iframe>
 </div>
 
-*Note: This interactive grid is best experienced in Chrome or Firefox, as the Web Audio API may have limitations in Safari.*
 
 ### Why Explore Microtonality?
 Microtonal music is not only for avant-garde experimentation; it offers a rich, untapped sonic terrain that challenges conventional listening. By stepping beyond the familiar, you might discover new tonal colors, unexpected harmonies, and a sense of pitch fluidity that isn't found in traditional scales.

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Harmonizing Tone Sets</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.39/Tone.js"></script>
+</head>
+<body>
+  <button onclick="playSet1()">Play Set 1 (Diatonic)</button>
+  <button onclick="playSet2()">Play Set 2 (Pentatonic Extensions)</button>
+  <button onclick="playSet3()">Play Set 3 (Modal)</button>
+  <script>
+
+// Define the// Initialize synth
+const synth = new Tone.Synth().toDestination();
+
+// Define the tone sets
+const set1 = ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "D5", "E5"];
+const set2 = ["C4", "D4", "E4", "G4", "A4", "Bb4", "F4", "G4", "D5"];
+const set3 = ["C4", "D4", "E4", "F#4", "G4", "A4", "B4", "D5", "G5"];
+
+// Function to shuffle the order of notes in a set
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// Function to play each set with a 0.5-second interval
+function playSet(notes) {
+  let time = 0;
+  notes.forEach(note => {
+    synth.triggerAttackRelease(note, "8n", Tone.now() + time);
+    time += 0.5; // time interval between notes
+  });
+}
+
+// Functions to play each set in random order
+function playSet1() {
+  Tone.start();
+  playSet(shuffle([...set1]));
+}
+
+function playSet2() {
+  Tone.start();
+  playSet(shuffle([...set2]));
+}
+
+function playSet3() {
+  Tone.start();
+  playSet(shuffle([...set3]));
+}
+
+
+
+  </script>
+</body>
+</html>

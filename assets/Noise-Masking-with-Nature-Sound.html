@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noise Masking with Nature Sound</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Noise Masking with Nature Sound</h1>
+    <button onclick="playNatureSound()">Start Nature Sound</button>
+    <button onclick="stopNatureSound()">Stop Nature Sound</button>
+
+    <script>
+        let audioContext;
+        let natureSound;
+
+        function playNatureSound() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            // Load and play nature sound
+            fetch('Yoga.mp3') // Replace with a URL to the sound file
+                .then(response => response.arrayBuffer())
+                .then(data => audioContext.decodeAudioData(data))
+                .then(buffer => {
+                    natureSound = audioContext.createBufferSource();
+                    natureSound.buffer = buffer;
+                    natureSound.loop = true;
+                    natureSound.connect(audioContext.destination);
+                    natureSound.start(0);
+                });
+        }
+
+        function stopNatureSound() {
+            if (natureSound) {
+                natureSound.stop();
+                natureSound.disconnect();
+                natureSound = null;
+            }
+        }
+
+        // Automatically stop audio context on page unload
+        window.onunload = function() {
+            if (audioContext) {
+                audioContext.close();
+            }
+        };
+    </script>
+</body>
+</html>

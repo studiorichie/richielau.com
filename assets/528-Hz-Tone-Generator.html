@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>528 Hz Tone Generator</title>
+</head>
+<body>
+  <button id="startButton">Play 528 Hz Tone</button>
+  <button id="stopButton">Stop Tone</button>
+
+  <script>
+    let audioContext;
+    let oscillator;
+
+    document.getElementById('startButton').addEventListener('click', () => {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (!oscillator) {
+        oscillator = audioContext.createOscillator();
+        oscillator.type = 'sine'; // Waveform type: 'sine', 'square', 'sawtooth', 'triangle'
+        oscillator.frequency.setValueAtTime(528, audioContext.currentTime); // Set frequency to 528 Hz
+        oscillator.connect(audioContext.destination);
+        oscillator.start();
+      }
+    });
+
+    document.getElementById('stopButton').addEventListener('click', () => {
+      if (oscillator) {
+        oscillator.stop();
+        oscillator.disconnect();
+        oscillator = null;
+      }
+    });
+  </script>
+</body>
+</html>

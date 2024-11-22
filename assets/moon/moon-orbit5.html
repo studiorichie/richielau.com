@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Elliptical Moon Orbit</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: black;
+    }
+    .earth {
+      width: 100px;
+      height: 100px;
+      background-color: blue;
+      border-radius: 50%;
+      position: relative;
+    }
+    .moon {
+      width: 30px;
+      height: 30px;
+      background-color: gray;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+  <div class="earth">
+    <div class="moon"></div>
+  </div>
+  <script>
+    const moon = document.querySelector('.moon');
+    const orbitRadiusX = 150; // Semi-major axis
+    const orbitRadiusY = 100; // Semi-minor axis
+    let angle = 0;
+
+    function animate() {
+      const x = orbitRadiusX * Math.cos(angle);
+      const y = orbitRadiusY * Math.sin(angle);
+      moon.style.transform = `translate(${x}px, ${y}px)`;
+      angle += 0.01;
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>

@@ -31,23 +31,17 @@ bundle exec jekyll serve
 By default, the site will be accessible at [http://127.0.0.1:4000].
 
 ## Quick Local Development Commands
-- Start the local server: `bundle exec jekyll serve`
-- Stop the server: `CTRL+C` in your terminal
-- Clear the `_site` folder (optional): `rm -rf _site/` (useful if you encounter build issues)
+- Start the local server: 
+`bundle exec jekyll serve`
 
-3. **Sync Changes with GitHub**
-Before making any changes, pull the latest changes from GitHub to avoid conflicts:
-
-```bash
-git pull --rebase origin main
-```
+bundle exec jekyll serve & open http://127.0.0.1:4000
 
 
 4. **Commit and Push Changes**
 After making changes, add, commit, and push them to GitHub:
 ```bash
 git add .
-git commit -m "Sound to Color Mapping with MIDI"
+git commit -m "Lunar Base Development Plan"
 git push origin main
 ```
 

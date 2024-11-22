@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive Amen-Style Beat Grid</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.39/Tone.js"></script>
+  <style>
+    .grid { display: grid; grid-template-columns: repeat(4, 60px); gap: 5px; }
+    .grid button { width: 60px; height: 60px; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <h2>Customize Your Beat</h2>
+  <div class="grid" id="beatGrid"></div>
+  <button onclick="playCustomBeat()">Play Beat</button>
+  <button onclick="stopCustomBeat()">Stop Beat</button>
+  
+  <script>
+  // Initialize the drum sounds
+    const kick = new Tone.MembraneSynth().toDestination();
+    const snare = new Tone.NoiseSynth({ volume: -10 }).toDestination();
+    const hihat = new Tone.MetalSynth({ frequency: 400, volume: -15 }).toDestination();
+    const reverb = new Tone.Reverb(0.5).toDestination();
+    const compressor = new Tone.Compressor(-30, 3).toDestination();
+    
+    // Connect drum sounds to effects for added depth
+    kick.connect(reverb);
+    snare.connect(reverb);
+    hihat.connect(reverb);
+    reverb.connect(compressor);
+    
+    // Initialize a 4x4 grid pattern (false = off, true = on)
+    let pattern = [
+      [false, false, false, false], // Kick row
+      [false, false, false, false], // Snare row
+      [false, false, false, false], // Hi-hat row
+      [false, false, false, false]  // Clap or extra sound row
+    ];
+    
+    // Generate the grid in the HTML
+    const beatGrid = document.getElementById("beatGrid");
+    const instruments = ["Kick", "Snare", "Hi-Hat", "Clap"];
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        const button = document.createElement("button");
+        button.textContent = `${instruments[row]}`;
+        button.onclick = () => toggleCell(row, col, button);
+        beatGrid.appendChild(button);
+      }
+    }
+    
+    // Toggle cell state (on/off)
+    function toggleCell(row, col, button) {
+      pattern[row][col] = !pattern[row][col];
+      button.style.backgroundColor = pattern[row][col] ? "green" : "";
+    }
+    
+    // Play the custom beat based on grid state
+    function playCustomBeat() {
+      Tone.start();
+      Tone.Transport.cancel(); // Clear any previous scheduled beats
+      Tone.Transport.bpm.value = 170;
+      Tone.Transport.start();
+    
+      // Schedule each step in the 4x4 grid based on the pattern
+      for (let step = 0; step < 4; step++) {
+        Tone.Transport.schedule(time => {
+          if (pattern[0][step]) kick.triggerAttackRelease("C1", "8n", time);
+          if (pattern[1][step]) snare.triggerAttackRelease("16n", time);
+          if (pattern[2][step]) hihat.triggerAttackRelease("8n", time);
+          if (pattern[3][step]) snare.triggerAttackRelease("16n", time, 0.3); // clap or alternate snare
+        }, `0:0:${step}`);
+      }
+    
+      // Loop the pattern seamlessly
+      Tone.Transport.loop = true;
+      Tone.Transport.loopEnd = "1m";
+    }
+    
+    // Stop the beat
+    function stopCustomBeat() {
+      Tone.Transport.stop();
+    }
+    </script>
+</body>
+</html>

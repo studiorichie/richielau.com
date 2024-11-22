@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Tone Generator with Tone.js</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.39/Tone.js"></script>
+</head>
+<body>
+  <label for="frequency">Enter Frequency (Hz):</label>
+  <input type="number" id="frequency" value="440" min="20" max="20000">
+  <button id="playButton">Play Tone</button>
+  <button id="stopButton">Stop Tone</button>
+
+  <script>
+    let oscillator;
+
+    document.getElementById('playButton').addEventListener('click', async () => {
+      const frequency = parseFloat(document.getElementById('frequency').value);
+      await Tone.start();
+      if (!oscillator) {
+        oscillator = new Tone.Oscillator(frequency, 'sine').toDestination();
+        oscillator.start();
+      } else {
+        oscillator.frequency.value = frequency;
+      }
+    });
+
+    document.getElementById('stopButton').addEventListener('click', () => {
+      if (oscillator) {
+        oscillator.stop();
+        oscillator = null;
+      }
+    });
+  </script>
+</body>
+</html>

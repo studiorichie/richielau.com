@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Moon Orbit Animation</title>
+  <style>
+    canvas {
+      display: block;
+      margin: auto;
+      background-color: black;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="orbitCanvas" width="600" height="600"></canvas>
+  <script>
+    const canvas = document.getElementById('orbitCanvas');
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const earthRadius = 50;
+    const moonRadius = 15;
+    const orbitRadius = 150;
+    let angle = 0;
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw Earth
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
+      ctx.fillStyle = 'blue';
+      ctx.fill();
+
+      // Calculate Moon position
+      const moonX = centerX + orbitRadius * Math.cos(angle);
+      const moonY = centerY + orbitRadius * Math.sin(angle);
+
+      // Draw Moon
+      ctx.beginPath();
+      ctx.arc(moonX, moonY, moonRadius, 0, Math.PI * 2);
+      ctx.fillStyle = 'gray';
+      ctx.fill();
+
+      angle += 0.01;
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  </script>
+</body>
+</html>

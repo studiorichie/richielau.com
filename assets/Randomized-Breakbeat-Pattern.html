@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Randomized Breakbeat Pattern</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.39/Tone.js"></script>
+</head>
+
+<body>
+    <button onclick="randomizePattern()">Randomize Pattern</button>
+    <button onclick="playPattern()">Play Pattern</button>
+    <button onclick="stopPattern()">Stop Pattern</button>
+    <script>
+        // Initialize the instruments (synthesized sounds for kick, snare, hi-hat, and clap)
+        const kick = new Tone.MembraneSynth().toDestination();
+        const snare = new Tone.NoiseSynth({ volume: -10 }).toDestination();
+        const hihat = new Tone.MetalSynth({ frequency: 400, volume: -15 }).toDestination();
+        const clap = new Tone.MetalSynth({ frequency: 200, volume: -15 }).toDestination();
+
+        // Define a 4x4 grid where each cell represents an active (1) or inactive (0) hit
+        let grid = [
+            [0, 0, 0, 0], // Kick row
+            [0, 0, 0, 0], // Snare row
+            [0, 0, 0, 0], // Hi-hat row
+            [0, 0, 0, 0]  // Clap row
+        ];
+
+        // Function to randomize the pattern
+        function randomizePattern() {
+            grid = [
+                // Kicks row (higher chance on step 1 and 3)
+                [Math.random() > 0.2 ? 1 : 0, 0, Math.random() > 0.2 ? 1 : 0, 0],
+                // Snares row (higher chance on step 2 and 4)
+                [0, Math.random() > 0.3 ? 1 : 0, 0, Math.random() > 0.3 ? 1 : 0],
+                // Hi-hats row (higher chance for each step, some open/closed variation)
+                [Math.random() > 0.4 ? 1 : 0, Math.random() > 0.4 ? 1 : 0, Math.random() > 0.4 ? 1 : 0, Math.random() > 0.4 ? 1 : 0],
+                // Clap row (occasional clap to add syncopation)
+                [0, Math.random() > 0.8 ? 1 : 0, 0, Math.random() > 0.8 ? 1 : 0]
+            ];
+            console.log("Structured Randomized Pattern:", grid);
+        }
+
+
+        // Function to play the current pattern
+        function playPattern() {
+            Tone.start();
+            Tone.Transport.cancel(); // Clear previous schedule to avoid overlap
+
+            // Set the BPM for the loop (e.g., 130 BPM for a classic breakbeat tempo)
+            Tone.Transport.bpm.value = 175;
+
+            Tone.Transport.start();
+
+            // Loop through each beat step in the 4x4 grid
+            for (let step = 0; step < 4; step++) {
+                Tone.Transport.schedule(time => {
+                    if (grid[0][step]) kick.triggerAttackRelease("C1", "8n", time);
+                    if (grid[1][step]) snare.triggerAttackRelease("16n", time);
+                    if (grid[2][step]) hihat.triggerAttackRelease("8n", time);
+                    if (grid[3][step]) clap.triggerAttackRelease("16n", time);
+                }, `0:0:${step}`);
+            }
+
+            // Set loop timing
+            Tone.Transport.loop = true;
+            Tone.Transport.loopEnd = "1m"; // Loop every measure (4 beats)
+        }
+
+
+
+        // Function to stop the pattern
+        function stopPattern() {
+            Tone.Transport.stop();
+        }
+
+
+    </script>
+</body>
+
+</html>

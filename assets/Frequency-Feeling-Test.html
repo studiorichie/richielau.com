@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frequency Feeling Test</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            flex-direction: column;
+        }
+        .dialog {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 300px;
+            z-index: 10;
+        }
+        #startButton {
+            font-size: 18px;
+            color: #555;
+            padding: 10px 20px;
+            background-color: #363636;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #startButton:hover {
+            background-color: #787878;
+        }
+        .prompt-bold {
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .color-wheel {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+        #submitResponse {
+            font-size: 16px;
+            padding: 10px 20px;
+            margin-top: 15px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <button id="startButton">Start Test</button>
+
+    <script>
+        const frequencies = [60, 100, 150, 200, 250, 300, 400, 500, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 4500, 3000, 2500];
+        const shuffledFrequencies = frequencies.sort(() => Math.random() - 0.5);
+        let entryCount = 0;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let oscillator;
+        let selectedColor = "#000000";
+        let responses = [];
+
+        function startTimer(duration, callback) {
+            let timeRemaining = duration;
+            const countdownInterval = setInterval(() => {
+                timeRemaining--;
+                if (timeRemaining <= 0) {
+                    clearInterval(countdownInterval);
+                    callback();
+                }
+            }, 1000);
+        }
+
+        async function playTone() {
+            if (entryCount >= 25) {
+                displayResults();
+                return;
+            }
+
+            if (oscillator) {
+                oscillator.stop();
+                oscillator.disconnect();
+            }
+
+            const randomFrequency = shuffledFrequencies[entryCount];
+            oscillator = audioCtx.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(randomFrequency, audioCtx.currentTime);
+            oscillator.connect(audioCtx.destination);
+            oscillator.start();
+
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            oscillator.stop();
+            oscillator.disconnect();
+
+            entryCount++;
+            promptForResponse();
+        }
+
+        function promptForResponse() {
+            const existingDialog = document.querySelector(".dialog");
+            if (existingDialog) existingDialog.remove();
+
+            const responseDiv = document.createElement("div");
+            responseDiv.className = "dialog";
+            responseDiv.innerHTML = `
+                <div class="prompt-bold">Entry ${entryCount} of 25</div>
+                <div class="prompt-bold">What comes to mind?</div><br>
+                <input type="text" id="feelingInput" placeholder="Enter your response" style="width: 100%; margin-top: 10px;" autocomplete="off"><br><br>
+                <label>Select a color:</label>
+                <div class="color-wheel">
+                    ${generateColorSwatches()}
+                </div>
+                <button id="submitResponse">Submit</button>
+            `;
+            document.body.appendChild(responseDiv);
+
+            document.querySelectorAll(".color-swatch").forEach(swatch => {
+                swatch.onclick = () => {
+                    document.querySelectorAll(".color-swatch").forEach(s => s.style.border = "2px solid transparent");
+                    swatch.style.border = "2px solid black";
+                    selectedColor = swatch.dataset.color;
+                };
+            });
+
+            document.getElementById("submitResponse").onclick = function() {
+                const feeling = document.getElementById("feelingInput").value || "None";
+                responses.push(`Entry ${entryCount} - Response: ${feeling}, Color: ${selectedColor}`);
+                
+                document.body.removeChild(responseDiv);
+                startTimer(3, playTone);
+            };
+        }
+
+        function displayResults() {
+            const resultDiv = document.createElement("div");
+            resultDiv.className = "dialog";
+            resultDiv.innerHTML = "<h2>Test Complete! Your Responses:</h2><br>" + responses.join("<br>") + "<br>";
+            document.body.appendChild(resultDiv);
+        }
+
+        function generateColorSwatches() {
+            const colors = [
+                "#FF0000", "#FF7F00", "#FFA500", "#FFD700", "#FFFF00",  // Red to Yellow range
+                "#ADFF2F", "#00FF00", "#32CD32", "#008000", "#006400",  // Yellow-Green to Dark Green
+                "#00FFFF", "#1E90FF", "#0000FF", "#4B0082", "#8A2BE2",  // Light Blue to Violet
+                "#FF00FF", "#FF1493", "#FF69B4", "#FF4500", "#FF6347",  // Pink/Magenta to Coral/Orange shades
+                "#4F4F4F", "#696969", "#A9A9A9", "#D3D3D3", "#FFFFFF",  // Greys and White
+                "#8B4513", "#A0522D", "#D2B48C", "#DEB887", "#FFF5EE"   // Browns and Beige shades
+            ];
+            return colors.map(color => `<div class="color-swatch" data-color="${color}" style="background-color: ${color};"></div>`).join("");
+        }
+
+        document.getElementById("startButton").onclick = function() {
+            document.getElementById("startButton").style.display = "none";
+            startTimer(3, playTone);
+        };
+    </script>
+</body>
+</html>

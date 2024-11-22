@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Earth-Sun System Animation</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: black;
+    }
+    .sun {
+      width: 100px;
+      height: 100px;
+      background-color: yellow;
+      border-radius: 50%;
+      position: relative;
+    }
+    .earth {
+      width: 0.9px;
+      height: 0.9px;
+      background-color: blue;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 10px;
+      animation: orbit 10s linear infinite;
+    }
+    @keyframes orbit {
+      0% {
+        transform: rotate(0deg) translateX(10px) rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg) translateX(10px) rotate(-360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sun">
+    <div class="earth"></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Frequency to Chladni Pattern Generator</title>
+    <style>
+        body, html {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        #chladniCanvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Frequency to Chladni Pattern Generator</h1>
+    <label for="frequencyInput">Frequency (Hz): <span id="frequencyValue">528</span></label>
+    <input type="range" id="frequencyInput" min="100" max="5000" step="1" value="528" oninput="updateFrequency()">
+    <canvas id="chladniCanvas" width="500" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById('chladniCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+
+        function updateFrequency() {
+            const frequency = document.getElementById('frequencyInput').value;
+            document.getElementById('frequencyValue').innerText = frequency;
+            drawChladniPattern(frequency);
+        }
+
+        function drawChladniPattern(frequency) {
+            ctx.clearRect(0, 0, width, height);
+
+            // Calculate m and n based on frequency, scaling non-linearly
+            const m = Math.round(Math.sqrt(frequency / 100) * 3); 
+            const n = Math.round(Math.sqrt(frequency / 100) * 4);
+
+            const threshold = 0.05; // Define how close to zero for nodal lines
+            for (let x = 0; x < width; x++) {
+                for (let y = 0; y < height; y++) {
+                    // Apply sine and cosine terms for more natural wave interference
+                    const value = Math.sin(m * x * Math.PI / width) * Math.cos(n * y * Math.PI / height) +
+                                  Math.cos(m * y * Math.PI / height) * Math.sin(n * x * Math.PI / width);
+                    if (Math.abs(value) < threshold) {
+                        ctx.fillStyle = 'black';
+                        ctx.fillRect(x, y, 1, 1);
+                    }
+                }
+            }
+        }
+
+        updateFrequency(); // Initial draw
+    </script>
+</body>
+</html>
