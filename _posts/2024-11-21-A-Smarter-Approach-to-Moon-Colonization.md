@@ -8,7 +8,7 @@ categories: robotic lunar exploration sustainable moon colonization lunar infras
 
 # Lunar Base Development Plan: A Smarter Approach to Moon Colonization
 
-![Moonbase Draft Image](/assets/images/rocket-tunnel-maker.png)
+![Moonbase Draft Image](/assets/images/rocket-tunnel-maker.webp)
 
 ## Overview
 This project outlines a bold and innovative plan to establish a sustainable lunar base using advanced robotics and multipurpose rocket technology. The concept reimagines the current Artemis program strategy, prioritizing robotic groundwork and leveraging the rocket as a tunneling device to create expansive underground shelters. This approach ensures the Moon is ready for human arrival with essential infrastructure, life-support systems, and a safe environment already in place.
@@ -34,6 +34,7 @@ This project outlines a bold and innovative plan to establish a sustainable luna
 
 ## Phased Implementation
 
+![Moonbase Draft Image](/assets/images/lunar-algae-based-oxygen-tunnel.webp)
 ### Phase 1: Robotic Pioneering
 **Tasks:**
 - Deploy autonomous robots to gather resources (water, regolith, metals).
@@ -47,6 +48,7 @@ This project outlines a bold and innovative plan to establish a sustainable luna
 ---
 
 ### Phase 2: Habitat Preparation
+![Moonbase Draft Image](/assets/images/underground-tunnel-living-quarters.webp)
 **Tasks:**
 - Install modular life-support systems for oxygen generation and water recycling.
 - Furnish habitats with tools, airlocks, and living spaces.
@@ -58,6 +60,8 @@ This project outlines a bold and innovative plan to establish a sustainable luna
 ---
 
 ### Phase 3: Human Arrival
+
+![Moonbase Draft Image](/assets/images/human-arrival-lunar-habitat.webp)
 **Tasks:**
 - Transition base control from robots to human crews.
 - Focus on scientific exploration, habitat expansion, and long-term mission sustainability.
