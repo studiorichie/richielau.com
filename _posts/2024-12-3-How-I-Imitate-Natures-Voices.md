@@ -1,8 +1,9 @@
 ---
-title: "How I Imitate Nature’s Voices | Snow Raven | TED"
+layout: post
+title: "How I Imitate Nature’s Voices - Snow Raven"
 date: 2024-12-03 12:19:08 -0500
-categories: [Performance, Nature, Culture]
-tags: [Snow Raven  TED Talk  Sakha Throat Singing  Nature Sounds]
+categories: Performance, Nature, Culture
+tags: Snow Raven  TED Talk  Sakha Throat Singing  Nature Sounds
 youtube_id: g3AU44HfpfE
 ---
 
