@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Techno Beat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    #tempo {
+      width: 300px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Simple Techno Beat</h1>
+  <button id="startButton">Start Beat</button>
+  <button id="stopButton" disabled>Stop Beat</button>
+  <br><br>
+  <label for="tempo">Tempo: <span id="tempoValue">120</span> BPM</label>
+  <br>
+  <input type="range" id="tempo" min="60" max="180" value="120">
+  
+  <script>
+    let audioContext;
+    let isPlaying = false;
+    let current16thNote;
+    let tempo = 120.0;
+    let lookahead = 25.0; // How frequently to call scheduling function (in milliseconds)
+    let scheduleAheadTime = 0.1; // How far ahead to schedule audio (sec)
+    let nextNoteTime = 0.0; // when the next note is due
+    let timerID;
+
+    function nextNote() {
+      const secondsPerBeat = 60.0 / tempo;
+      nextNoteTime += 0.25 * secondsPerBeat; // Add quarter note length to time
+      current16thNote++;
+      if (current16thNote === 16) {
+        current16thNote = 0;
+      }
+    }
+
+    function scheduleNote(beatNumber, time) {
+      if (beatNumber % 4 === 0) {
+        playKick(time);
+      }
+    }
+
+    function playKick(time) {
+      const osc = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      osc.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      osc.frequency.setValueAtTime(150, time);
+      gainNode.gain.setValueAtTime(1, time);
+      osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.5);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.5);
+      osc.start(time);
+      osc.stop(time + 0.5);
+    }
+
+    function scheduler() {
+      while (nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
+        scheduleNote(current16thNote, nextNoteTime);
+        nextNote();
+      }
+      timerID = setTimeout(scheduler, lookahead);
+    }
+
+    function startBeat() {
+      if (isPlaying) return;
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      current16thNote = 0;
+      nextNoteTime = audioContext.currentTime;
+      scheduler();
+      isPlaying = true;
+      document.getElementById('startButton').disabled = true;
+      document.getElementById('stopButton').disabled = false;
+    }
+
+    function stopBeat() {
+      if (!isPlaying) return;
+      clearTimeout(timerID);
+      isPlaying = false;
+      document.getElementById('startButton').disabled = false;
+      document.getElementById('stopButton').disabled = true;
+    }
+
+    document.getElementById('startButton').addEventListener('click', startBeat);
+    document.getElementById('stopButton').addEventListener('click', stopBeat);
+    document.getElementById('tempo').addEventListener('input', function() {
+      tempo = this.value;
+      document.getElementById('tempoValue').innerText = tempo;
+    });
+  </script>
+</body>
+</html>

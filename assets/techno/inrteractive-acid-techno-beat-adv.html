@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Acid Techno Beat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .control {
+            margin: 10px 0;
+        }
+
+        input[type=range],
+        button,
+        select {
+            width: 300px;
+        }
+
+        .sequencer {
+            display: grid;
+            grid-template-columns: repeat(16, 30px);
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .step {
+            width: 30px;
+            height: 30px;
+            background-color: lightgray;
+            border: 1px solid black;
+            cursor: pointer;
+        }
+
+        .step.active {
+            background-color: orange;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Interactive Acid Techno Beat</h1>
+    <button id="startButton">Start Beat</button>
+    <button id="stopButton" disabled>Stop Beat</button>
+    <button id="savePreset">Save Preset</button>
+    <button id="loadPreset">Load Preset</button>
+    <button id="exportAudio">Export Audio</button>
+
+    <div class="control">
+        <label for="tempo">Tempo: <span id="tempoValue">120</span> BPM</label><br>
+        <input type="range" id="tempo" min="60" max="180" value="120">
+    </div>
+
+    <div class="control">
+        <label for="cutoff">Filter Cutoff Frequency: <span id="cutoffValue">1000</span> Hz</label><br>
+        <input type="range" id="cutoff" min="100" max="5000" value="1000">
+    </div>
+
+    <div class="control">
+        <label for="resonance">Filter Resonance (Q): <span id="resonanceValue">15</span></label><br>
+        <input type="range" id="resonance" min="1" max="30" value="15">
+    </div>
+
+    <div class="control">
+        <label for="waveform">Oscillator Waveform: <span id="waveformValue">sawtooth</span></label><br>
+        <select id="waveform">
+            <option value="sine">Sine</option>
+            <option value="square">Square</option>
+            <option value="sawtooth" selected>Sawtooth</option>
+            <option value="triangle">Triangle</option>
+        </select>
+    </div>
+
+    <h2>Pattern Sequencer</h2>
+    <div class="sequencer" id="kickSequencer"></div>
+    <div class="sequencer" id="snareSequencer"></div>
+    <div class="sequencer" id="hihatSequencer"></div>
+    <div class="sequencer" id="basslineSequencer"></div>
+
+
+    <script>
+        let audioContext;
+        let isPlaying = false;
+        let current16thNote = 0;
+        let tempo = 120.0;
+        const lookahead = 25.0;
+        const scheduleAheadTime = 0.1;
+        let nextNoteTime = 0.0;
+        let timerID;
+        let filterCutoff = 1000;
+        let filterResonance = 15;
+        let oscillatorWaveform = 'sawtooth';
+
+        const pattern = Array(16).fill(false); // Initialize empty 16-step pattern
+        const sequencer = document.getElementById('sequencer');
+
+        // Sequencer Module
+        const sequencer = {
+            rows: [],
+            addRow(name, length = 16) {
+                const row = Array(length).fill(false);
+                this.rows.push({ name, pattern: row });
+                return row;
+            },
+            getPattern(name) {
+                return this.rows.find((row) => row.name === name)?.pattern || [];
+            },
+        };
+
+        // Audio Module
+        const audio = {
+            context: null,
+            init() {
+                this.context = new (window.AudioContext || window.webkitAudioContext)();
+            },
+            playBassline(time, freq, waveform = "sawtooth") {
+                const osc = this.context.createOscillator();
+                osc.type = waveform;
+                osc.frequency.setValueAtTime(freq, time);
+
+                const filter = this.context.createBiquadFilter();
+                filter.type = "lowpass";
+                filter.frequency.setValueAtTime(1000, time);
+
+                const gain = this.context.createGain();
+                gain.gain.setValueAtTime(0.5, time);
+
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.context.destination);
+
+                osc.start(time);
+                osc.stop(time + 0.5);
+            },
+        };
+
+        // Export Logic
+        const exporter = {
+            exportWAV(buffer) {
+                const wavBlob = bufferToWave(buffer, buffer.length);
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(wavBlob);
+                link.download = "exported_audio.wav";
+                link.click();
+            },
+        };
+
+
+
+        // Create sequencer grid
+        for (let i = 0; i < 16; i++) {
+            const step = document.createElement('div');
+            step.classList.add('step');
+            step.dataset.step = i;
+            step.addEventListener('click', () => {
+                step.classList.toggle('active');
+                pattern[i] = !pattern[i];
+            });
+            sequencer.appendChild(step);
+        }
+
+        sequencer.addRow("Kick");
+        sequencer.addRow("Snare");
+        sequencer.addRow("HiHat");
+        sequencer.addRow("Bassline");
+
+        // Create sequencer grid for each row
+        ["Kick", "Snare", "HiHat", "Bassline"].forEach((name, rowIndex) => {
+            const container = document.getElementById(`${name.toLowerCase()}Sequencer`);
+            const pattern = sequencer.getPattern(name);
+
+            for (let i = 0; i < pattern.length; i++) {
+                const step = document.createElement("div");
+                step.classList.add("step");
+                step.dataset.step = i;
+                step.addEventListener("click", () => {
+                    step.classList.toggle("active");
+                    pattern[i] = !pattern[i];
+                });
+                container.appendChild(step);
+            }
+        });
+
+
+        function nextNote() {
+            const secondsPerBeat = 60.0 / tempo;
+            nextNoteTime += 0.25 * secondsPerBeat;
+            current16thNote = (current16thNote + 1) % 16;
+        }
+
+        function scheduleNote(beatNumber, time) {
+            if (pattern[beatNumber]) {
+                playAcidBassline(time);
+            }
+        }
+
+        function scheduler() {
+            while (nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
+                scheduleNote(current16thNote, nextNoteTime);
+                nextNote();
+            }
+            timerID = setTimeout(scheduler, lookahead);
+        }
+
+        function playAcidBassline(time) {
+            const osc = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
+            osc.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            osc.type = oscillatorWaveform;
+            osc.frequency.setValueAtTime(110, time);
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(filterCutoff, time);
+            filter.Q.setValueAtTime(filterResonance, time);
+            gainNode.gain.setValueAtTime(0.5, time);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.5);
+            osc.start(time);
+            osc.stop(time + 0.5);
+        }
+
+        function play() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            nextNoteTime = audioContext.currentTime;
+            scheduler();
+            isPlaying = true;
+            document.getElementById('startButton').disabled = true;
+            document.getElementById('stopButton').disabled = false;
+        }
+
+        function stop() {
+            isPlaying = false;
+            clearTimeout(timerID);
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('stopButton').disabled = true;
+        }
+
+        function savePreset() {
+            const preset = {
+                tempo,
+                filterCutoff,
+                filterResonance,
+                oscillatorWaveform,
+                pattern,
+            };
+            localStorage.setItem('technoPreset', JSON.stringify(preset));
+            alert('Preset Saved!');
+        }
+
+        function loadPreset() {
+            const preset = JSON.parse(localStorage.getItem('technoPreset'));
+            if (preset) {
+                tempo = preset.tempo;
+                filterCutoff = preset.filterCutoff;
+                filterResonance = preset.filterResonance;
+                oscillatorWaveform = preset.oscillatorWaveform;
+                pattern.splice(0, pattern.length, ...preset.pattern);
+
+                document.getElementById('tempo').value = tempo;
+                document.getElementById('cutoff').value = filterCutoff;
+                document.getElementById('resonance').value = filterResonance;
+                document.getElementById('waveform').value = oscillatorWaveform;
+
+                document.getElementById('tempoValue').innerText = tempo;
+                document.getElementById('cutoffValue').innerText = filterCutoff;
+                document.getElementById('resonanceValue').innerText = filterResonance;
+                document.getElementById('waveformValue').innerText = oscillatorWaveform;
+
+                [...sequencer.children].forEach((step, index) => {
+                    step.classList.toggle('active', pattern[index]);
+                });
+
+                alert('Preset Loaded!');
+            } else {
+                alert('No preset found!');
+            }
+        }
+
+        async function exportAudio() {
+            const offlineContext = new OfflineAudioContext(2, 44100 * 5, 44100);
+            const osc = offlineContext.createOscillator();
+            osc.type = oscillatorWaveform;
+            osc.frequency.value = 110;
+
+            const filter = offlineContext.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = filterCutoff;
+            filter.Q.value = filterResonance;
+
+            osc.connect(filter);
+            filter.connect(offlineContext.destination);
+            osc.start(0);
+            osc.stop(5);
+
+            const renderedBuffer = await offlineContext.startRendering();
+            const wavBlob = bufferToWave(renderedBuffer, renderedBuffer.length);
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(wavBlob);
+            link.download = 'acid_techno.wav';
+            link.click();
+        }
+
+        function bufferToWave(buffer, length) {
+            const numOfChan = buffer.numberOfChannels;
+            const lengthSamples = length * buffer.sampleRate * numOfChan * 2 + 44;
+            const result = new DataView(new ArrayBuffer(lengthSamples));
+            const channels = [];
+            let offset = 0;
+            let pos = 0;
+
+            // Write WAVE header
+            setString("RIFF"); // ChunkID
+            setUint32(lengthSamples - 8); // ChunkSize
+            setString("WAVE"); // Format
+            setString("fmt "); // Subchunk1ID
+            setUint32(16); // Subchunk1Size (PCM)
+            setUint16(1); // AudioFormat
+            setUint16(numOfChan); // NumChannels
+            setUint32(buffer.sampleRate); // SampleRate
+            setUint32(buffer.sampleRate * numOfChan * 2); // ByteRate
+            setUint16(numOfChan * 2); // BlockAlign
+            setUint16(16); // BitsPerSample
+            setString("data"); // Subchunk2ID
+            setUint32(lengthSamples - pos - 8); // Subchunk2Size
+
+            // Interleave audio channels
+            for (let i = 0; i < numOfChan; i++) channels.push(buffer.getChannelData(i));
+            while (pos < lengthSamples) {
+                for (let i = 0; i < numOfChan; i++) {
+                    const sample = Math.max(-1, Math.min(1, channels[i][offset])); // Clipping
+                    result.setInt16(pos, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true); // Convert to PCM
+                    pos += 2;
+                }
+                offset++;
+            }
+
+            return new Blob([result], { type: "audio/wav" });
+
+            function setString(s) {
+                for (let i = 0; i < s.length; i++) result.setUint8(pos++, s.charCodeAt(i));
+            }
+
+            function setUint16(d) {
+                result.setUint16(pos, d, true);
+                pos += 2;
+            }
+
+            function setUint32(d) {
+                result.setUint32(pos, d, true);
+                pos += 4;
+            }
+        }
+
+
+        document.getElementById('startButton').addEventListener('click', play);
+        document.getElementById('stopButton').addEventListener('click', stop);
+        document.getElementById('savePreset').addEventListener('click', savePreset);
+        document.getElementById('loadPreset').addEventListener('click', loadPreset);
+        document.getElementById('exportAudio').addEventListener('click', exportAudio);
+    </script>
+</body>
+
+</html>
